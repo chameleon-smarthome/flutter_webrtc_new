@@ -1,7 +1,9 @@
 #import "FlutterWebRTCPlugin.h"
 #import "AudioUtils.h"
 #import "CameraUtils.h"
+
 #import "FlutterRTCDataChannel.h"
+#import "FlutterDataPacketCryptor.h"
 #import "FlutterRTCDesktopCapturer.h"
 #import "FlutterRTCMediaStream.h"
 #import "FlutterRTCPeerConnection.h"
@@ -194,6 +196,7 @@ static FlutterWebRTCPlugin *sharedSingleton;
   self.localTracks = [NSMutableDictionary new];
   self.renders = [NSMutableDictionary new];
   self.frameCryptors = [NSMutableDictionary new];
+  self.dataCryptors = [NSMutableDictionary new];
   self.keyProviders = [NSMutableDictionary new];
   self.videoCapturerStopHandlers = [NSMutableDictionary new];
   self.recorders = [NSMutableDictionary new];
@@ -1648,7 +1651,11 @@ static FlutterWebRTCPlugin *sharedSingleton;
       adm.voiceProcessingBypassed = value.boolValue;
       result(nil);
     } else {
-      [self handleFrameCryptorMethodCall:call result:result];
+      if([self handleFrameCryptorMethodCall:call result:result]) {
+          return;
+      } else {
+          [self handleDataPacketCryptorMethodCall:call result:result];
+      }
     }
 }
 
